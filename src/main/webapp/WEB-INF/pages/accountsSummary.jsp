@@ -714,13 +714,9 @@
 
 								<!-- div class="hr hr-18 dotted hr-double"></div -->
 
-								<!-- h4 class="pink">
+								<h4 class="pink">
 									<i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i>
 									<a href="#modal-table" role="button" class="green" data-toggle="modal"> Member Statement for  ( ${userName} )</a>
-								</h4 -->
-								
-								<h4 class="pink">
-									<a href="/login" role="button" class="green" data-toggle="modal"> Accounts Summary for  ( ${userName} )</a>
 								</h4>
 
 								<div class="hr hr-18 dotted hr-double"></div>
@@ -728,8 +724,9 @@
 								<div class="row">
 									<div class="col-xs-12">
 										<h3 class="header smaller lighter blue">My Statement</h3>
+										<!-- Start Accounts Balance-->
 										<div class="table-header">
-											Results for "My Running Transactions"
+											Results for "My Account Balances"
 										</div>
 
 										<!-- <div class="table-responsive"> -->
@@ -745,26 +742,22 @@
 																<span class="lbl"></span>
 															</label>
 														</th>
-														<th>Date</th>
-														<th>Account No.</th>
-														<th class="hidden-480">Account Name</th>
+														<th>Product Name</th>
+														<th>Account Name</th>
+														<th class="hidden-480">Account No</th>
 
 														<th>
 															<i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i>
-															Description
+															Available Balance
 														</th>
-														<th class="hidden-480">Debit</th>
-														
-														<th class="hidden-480">Credit</th>
-														
-														<th class="hidden-480">Balance</th>
+														<th class="hidden-480">Book Balance</th>
 
 														<th></th>
 													</tr>
 												</thead>
 
 												<tbody>
-													<c:forEach items="${listStatementAccountTransaction}" var="transaction">
+													<c:forEach items="${listStatementAccount}" var="statementAccount">
 													<tr> <!-- Start Here -->
 														<td class="center">
 															<label class="position-relative">
@@ -775,36 +768,14 @@
 
 														<td>
 															<!-- a href="#">app.com</a -->
-															<c:out value="${transaction.transactionDate}" />
+															<c:out value="${statementAccount.productName}" />
 														</td>
-														<td><c:out value="${transaction.accountNo}" /> </td>
-														<td class="hidden-480"><c:out value="${transaction.accountName}" /></td>
-														<td><c:out value="${transaction.description}" /></td>
+														<td><c:out value="${statementAccount.accountName}" /> </td>
+														<td class="hidden-480"> <a href="/memberstatement/${statementAccount.memberAccountId}"> <c:out value="${statementAccount.accountCode}" /> </a></td>
+														<td align="right"><c:out value="${statementAccount.bdAvailableBalance}" /></td>
 
-														<td class="hidden-480">
-															
-															<span class="hidden-480">
-															<c:choose>
-															<c:when test="${transaction.debitCredit == 'D'}">
-															<c:out value="${transaction.amount}" /></span>
-															</c:when>
-															</c:choose>
-														</td>
-														
-														<td class="hidden-480">
-															<span class="hidden-480">
-																														<span class="hidden-480">
-															<c:choose>
-															<c:when test="${transaction.debitCredit == 'C'}">
-															<c:out value="${transaction.amount}" /></span>
-															</c:when>
-															</c:choose>
-															
-															</span>
-														</td>
-														
-														<td class="hidden-480">
-															<span class="hidden-480"><c:out value="${transaction.bdBalanceAmount}" /></span>
+														<td class="hidden-480" align="right">
+															<span class="hidden-480"><c:out value="${statementAccount.bdBookBalance}" /></span>
 														</td>
 
 														<td>
@@ -862,6 +833,118 @@
 
 												</tbody>
 											</table>
+											<!--  End Account Balances -->
+											<!-- Start Loan Balances-->
+											<div class="table-header">
+											Results for "My Loan Balances"
+										</div>
+
+										<!-- <div class="table-responsive"> -->
+
+										<!-- <div class="dataTables_borderWrap"> -->
+										<div>
+											<table id="sample-table-2" class="table table-striped table-bordered table-hover">
+												<thead>
+													<tr>
+														<th class="center">
+															<label class="position-relative">
+																<input type="checkbox" class="ace" />
+																<span class="lbl"></span>
+															</label>
+														</th>
+														<th>Loan No</th>
+														<th>Date Disbursed</th>
+														<th class="hidden-480">Loan Product</th>
+
+														<th>
+															<i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i>
+															Loan Amount
+														</th>
+														<th class="hidden-480">Loan Balance</th>
+
+														<th></th>
+													</tr>
+												</thead>
+
+												<tbody>
+													<c:forEach items="${listLoanAccount}" var="loanAccount">
+													<tr> <!-- Start Here -->
+														<td class="center">
+															<label class="position-relative">
+																<input type="checkbox" class="ace" />
+																<span class="lbl"></span>
+															</label>
+														</td>
+
+														<td>
+															<!-- a href="#">app.com</a -->
+															<a href="/loanstatement/${loanAccount.loanApplicationId}">  <c:out value="${loanAccount.loanNo}" /> </a>
+														</td>
+														<td><c:out value="${loanAccount.dateDisbursed}" /> </td>
+														<td class="hidden-480"> <c:out value="${loanAccount.loanType}" /> </td>
+														<td align="right"><c:out value="${loanAccount.loanAmt}" /></td>
+
+														<td class="hidden-480" align="right">
+															<span class="hidden-480"><c:out value="${loanAccount.loanBalance}" /></span>
+														</td>
+
+														<td>
+															<div class="hidden-sm hidden-xs action-buttons">
+																<a class="blue" href="#">
+																	<i class="ace-icon fa fa-search-plus bigger-130"></i>
+																</a>
+
+																<a class="green" href="#">
+																	<i class="ace-icon fa fa-pencil bigger-130"></i>
+																</a>
+
+																<a class="red" href="#">
+																	<i class="ace-icon fa fa-trash-o bigger-130"></i>
+																</a>
+															</div>
+
+															<div class="hidden-md hidden-lg">
+																<div class="inline position-relative">
+																	<button class="btn btn-minier btn-yellow dropdown-toggle" data-toggle="dropdown" data-position="auto">
+																		<i class="ace-icon fa fa-caret-down icon-only bigger-120"></i>
+																	</button>
+
+																	<ul class="dropdown-menu dropdown-only-icon dropdown-yellow dropdown-menu-right dropdown-caret dropdown-close">
+																		<li>
+																			<a href="#" class="tooltip-info" data-rel="tooltip" title="View">
+																				<span class="blue">
+																					<i class="ace-icon fa fa-search-plus bigger-120"></i>
+																				</span>
+																			</a>
+																		</li>
+
+																		<li>
+																			<a href="#" class="tooltip-success" data-rel="tooltip" title="Edit">
+																				<span class="green">
+																					<i class="ace-icon fa fa-pencil-square-o bigger-120"></i>
+																				</span>
+																			</a>
+																		</li>
+
+																		<li>
+																			<a href="#" class="tooltip-error" data-rel="tooltip" title="Delete">
+																				<span class="red">
+																					<i class="ace-icon fa fa-trash-o bigger-120"></i>
+																				</span>
+																			</a>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+														</td>
+													</tr>
+													</c:forEach>
+													<!-- End Here -->
+
+												</tbody>
+											</table>
+											
+											<!--End Loan Balances -->
 										</div>
 									</div>
 								</div>
