@@ -3,15 +3,21 @@ package ke.co.chaiportal.controller;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.PathParam;
+
+import ke.co.chaiportal.model.StatementAccount;
+import ke.co.chaiportal.model.StatementAccountTransaction;
 import ke.co.chaiportal.model.Transaction;
 import ke.co.chaiportal.model.UserLogin;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.GenericType;
@@ -22,8 +28,13 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 @Controller
+@SessionAttributes("userLogin")
 @RequestMapping("/")
 public class BaseController {
+	
+	@Value( "${host.url}" )
+	private String hostUrl;
+	
 
 	@RequestMapping(value = "/welcome", method = RequestMethod.GET)
 	public String welcome(ModelMap model) {
@@ -32,8 +43,8 @@ public class BaseController {
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 		Client client = Client.create(clientConfig);
 		
-		WebResource webResource = client.resource("http://localhost:8080/restcomponent/statement/bosire");
-		
+		//WebResource webResource = client.resource(hostUrl+"/restcomponent/statement/bosire");
+		WebResource webResource = client.resource(hostUrl+"/vergesaccowebservices/statement/"+((UserLogin)model.get("userLogin")).getUserName());
 		//ClientResponse response = webResource.accept("application/json").type("application/json");
 
 		List<Transaction> listTransaction = webResource.get(new GenericType<List<Transaction>>(){});
@@ -60,20 +71,20 @@ public class BaseController {
 
 	}
 	
-	@RequestMapping(value = "/memberstatement", method = RequestMethod.GET)
+	@RequestMapping(value = {"/accountsSummary", "/login"}, method = RequestMethod.GET)
 	public String memberstatement(ModelMap model) {
 		
 		ClientConfig clientConfig = new DefaultClientConfig();
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 		Client client = Client.create(clientConfig);
 		
-		//http://localhost:8080/vergesaccowebservices
-		//WebResource webResource = client.resource("http://localhost:8080/restcomponent/statement/bosire");
-		WebResource webResource = client.resource("http://localhost:8080/vergesaccowebservices/statement/samuel.githaiga");
-		
+		//http://192.168.1.207:8080/vergesaccowebservices
+		//WebResource webResource = client.resource(hostUrl+"/restcomponent/statement/bosire");
+		//WebResource webResource = client.resource(hostUrl+"/vergesaccowebservices/statement/"+((UserLogin)model.get("userLogin")).getUserName());
+		WebResource webResource = client.resource(hostUrl+"/vergesaccowebservices/statement/accounts/"+((UserLogin)model.get("userLogin")).getUserName());
 		//ClientResponse response = webResource.accept("application/json").type("application/json");
 
-		List<Transaction> listTransaction = webResource.get(new GenericType<List<Transaction>>(){});
+		List<StatementAccount> listStatementAccount = webResource.get(new GenericType<List<StatementAccount>>(){});
 		
 		// for (Transaction transaction : listTransaction) {
 		// System.out.println(transaction);
@@ -81,10 +92,12 @@ public class BaseController {
 		//System.out.println();
 		model.addAttribute("message",
 				"Maven Web Project + Spring 3 MVC - welcome()");
-		model.addAttribute("listTransaction", listTransaction);
+		model.addAttribute("listStatementAccount", listStatementAccount);
+		model.addAttribute("userName", ((UserLogin)model.get("userLogin")).getUserName());
 
 		// Spring uses InternalResourceViewResolver and return back index.jsp
-		return "memberstatement";
+//		return "memberstatement";
+		return "accountsSummary";
 
 	}
 	
@@ -99,11 +112,12 @@ public class BaseController {
 	public String login(@ModelAttribute("userLogin") UserLogin userLogin, ModelMap model, Map<String, Object> map) {
 		
 		System.out.println("User Name : "+userLogin.getUserName());
-		System.out.println("Pass : "+userLogin.getPassword());
+		//System.out.println("Pass : "+userLogin.getPassword());
 		
 		map.put("userLogin", userLogin);
 		
 		if ((userLogin.getUserName() == null) || (userLogin.getUserName().equals("")) || (userLogin.getPassword().equals("")) || userLogin.getPassword() == null){
+			
 			return "main";
 		}
 		
@@ -112,25 +126,64 @@ public class BaseController {
 		Client client = Client.create(clientConfig);
 		
 		WebResource webResource = null;
-		webResource = client.resource("http://localhost:8080/vergesaccowebservices/statement/"+userLogin.getUserName());
+		//webResource = client.resource(hostUrl+"/vergesaccowebservices/statement/"+userLogin.getUserName());
+		
+		webResource = client.resource(hostUrl+"/vergesaccowebservices/statement/accounts/"+userLogin.getUserName());
 		
 		//ClientResponse response = webResource.accept("application/json").type("application/json");
 
-		List<Transaction> listTransaction = null;
+		List<StatementAccount> listStatementAccount = null;
 		if ((webResource != null)){
 			try{
-			listTransaction =		webResource.get(new GenericType<List<Transaction>>(){});
+				listStatementAccount =		webResource.get(new GenericType<List<StatementAccount>>(){});
 			} catch(UniformInterfaceException e){
 				return "main";
 			}
 		} 
 		
-		model.addAttribute("listTransaction", listTransaction);
+		model.addAttribute("listStatementAccount", listStatementAccount);
 		model.addAttribute("userName", userLogin.getUserName());
 		
-		return "memberstatement";
+		model.addAttribute(userLogin);
+		
+		//return "memberstatement";
+		return "accountsSummary";
 
 	}
 
+	
+	@RequestMapping(value = "/memberstatement/{memberAccountId}", method = RequestMethod.GET)
+	public String getMemberTransactions(@PathVariable("memberAccountId") Long memberAccountId,  ModelMap model) {
+		
+		ClientConfig clientConfig = new DefaultClientConfig();
+		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+		Client client = Client.create(clientConfig);
+		
+		//http://192.168.1.207:8080/vergesaccowebservices
+		//WebResource webResource = client.resource(hostUrl+"/restcomponent/statement/bosire");
+		//WebResource webResource = client.resource(hostUrl+"/vergesaccowebservices/statement/"+((UserLogin)model.get("userLogin")).getUserName());
+	
+		///accounts/{memberAccountId}/{isLoan}
+		System.out.println("PPPPPPPPPPP "+model.get("memberAccountId"));
+		System.out.println("PPPPPPPPPPP "+memberAccountId);
+		
+		WebResource webResource = client.resource(hostUrl+"/vergesaccowebservices/statement/accounts/"+memberAccountId+"/N");
+		//ClientResponse response = webResource.accept("application/json").type("application/json");
+
+		List<StatementAccountTransaction> listStatementAccountTransaction = webResource.get(new GenericType<List<StatementAccountTransaction>>(){});
+		
+		// for (Transaction transaction : listTransaction) {
+		// System.out.println(transaction);
+		// }
+		//System.out.println();
+		model.addAttribute("message",
+				"Maven Web Project + Spring 3 MVC - welcome()");
+		model.addAttribute("listStatementAccountTransaction", listStatementAccountTransaction);
+		model.addAttribute("userName", ((UserLogin)model.get("userLogin")).getUserName());
+
+		// Spring uses InternalResourceViewResolver and return back index.jsp
+		return "memberstatement";
+
+	}
 
 }

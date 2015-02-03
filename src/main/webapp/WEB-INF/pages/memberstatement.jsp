@@ -756,7 +756,7 @@
 												</thead>
 
 												<tbody>
-													<c:forEach items="${listTransaction}" var="transaction">
+													<c:forEach items="${listStatementAccountTransaction}" var="transaction">
 													<tr> <!-- Start Here -->
 														<td class="center">
 															<label class="position-relative">
@@ -767,14 +767,14 @@
 
 														<td>
 															<!-- a href="#">app.com</a -->
-															<c:out value="${transaction.createdStamp}" />
+															<c:out value="${transaction.transactionDate}" />
 														</td>
 														<td><c:out value="${transaction.accountNo}" /> </td>
 														<td class="hidden-480"><c:out value="${transaction.accountName}" /></td>
-														<td><c:out value="${transaction.transactionType}" /></td>
+														<td><c:out value="${transaction.description}" /></td>
 
 														<td class="hidden-480">
-															<span class="label label-sm label-warning"><c:out value="${transaction.transactionAmount}" /></span>
+															<span class="label label-sm label-warning"><c:out value="${transaction.amount}" /></span>
 														</td>
 
 														<td>
