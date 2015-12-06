@@ -209,6 +209,7 @@ public class BaseController {
 		}
 		model.addAttribute("listLoanAccount", listLoanAccount);
 		
+		
 		return "accountsSummary";
 
 	}
